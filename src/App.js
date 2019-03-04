@@ -1,21 +1,41 @@
 import React, { Component } from 'react';
-import Todos from './components/Todos';
+import Todos from './components/pages/Todos';
 // import GoogleSignIn from './components/GoogleSignIn';
-import AddTodo from './components/AddTodo';
+import AddTodo from './components/pages/AddTodo';
 import Header from './components/layout/Header';
 import About from './components/pages/About';
+import Home from './components/pages/Home';
+import Articles from './components/pages/Articles';
+import Videos from './components/pages/Videos';
+import Photos from './components/pages/Photos';
 import { BrowserRouter as Router,Route } from 'react-router-dom';
 import './App.css';
-//import uuid from 'uuid';
 import axios from 'axios'
+
+
+const API = 'AIzaSyBRsK1vCzRHXrFKj2X_tYkhnQuIvR_qOVw'
+const channelID = 'UCRAPKD2VxfVTvpd2esbCzfg'
+const result = 10
+var finalURL = `https://www.googleapis.com/youtube/v3/search?key=${API}&channelId=${channelID}&part=snippet,id&order=date&maxResults=${result}`
+
 
 class App extends Component {
   state = {
-    todos: []
+    todos: [],
+    resultyt: []
   }
   componentDidMount() {
     axios.get('https://jsonplaceholder.typicode.com/todos?_limit=10')
     .then(res => this.setState({ todos: res.data }))
+    fetch(finalURL)
+    .then((response) => response.json())
+    .then((responseJson)=>{
+      const resultyt = responseJson.items.map(obj => 'https://www.youtube.com/embed/'+obj.id.videoId);
+      this.setState({resultyt});
+    })
+    .catch((error) => {
+      console.error(error);
+    });
   }
   markComplete = (id) => {
     this.setState({
@@ -44,13 +64,21 @@ class App extends Component {
       <div className="App">
       <div className='container'>
       <Header />
-      <Route exact path='/' render={props =>(
+      <Route exact path='/todos' render={props =>(
         <React.Fragment>
         <AddTodo addTodo={this.addTodo}/>
           <Todos todos={this.state.todos} markComplete={this.markComplete} delTodo={this.delTodo}/>
         </React.Fragment>
       )} />
+      <Route exact path='/videos' render={props =>(
+        <React.Fragment>
+          <Videos resultyt={this.state.resultyt}/>
+        </React.Fragment>
+      )} />
       <Route exact path='/about' component={About}/>
+      <Route exact path='/' component={Home}/>
+      <Route exact path='/articles' component={Articles}/>
+      <Route exact path='/photos' component={Photos}/>
 
       </div>
       </div>
